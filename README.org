@@ -1,19 +1,40 @@
 * Plugins test
-** With qgis.testing
-   This solution is especially suitable for unit tests. Virtually every QGIS
-   feature that has a python API can be used except for operations directly
-   related to the user interface.
+** Using =qgis.testing= module
+   See https://github.com/qgis/QGIS/blob/master/python/testing/__init__.py.
 
-   For example, here
+   Calling the =start_app()= function, a =QgsApplication= is started and all
+   initialization code is called.
+
+   This solution is especially suitable for unit tests.
+
+   Virtually every QGIS feature that has a python API can be used except
+   for operations directly related to the user interface.
+
+   For example, in the QGIS Model Baker project,
    https://github.com/opengisch/QgisModelBaker/tree/master/QgisModelBaker/tests
-   is used where QGIS is located in a docker and tests are performed in this
-   way.
+   this solution is used for unit testing.
 
-   Run the tests with =nosetests /unit=
+   Some examples are located in the =qgis_testing= directory of this repo.
+
+   The =test_geometries.py= module will create some geometries on a temporary
+   layer and the =test_print_layout.py= module will load a QGIS project and
+   generate a PDF with the layout manager.
+
+   To run the tests call
+   #+begin_src sh
+     nosetests /qgis_testing
+   #+end_src
+   from the repo root.
 ** Full QGIS in a docker
-   See https://github.com/qgis/QGIS/tree/master/.docker. This is a way to run
-   tests inside a real instance of QGIS (not a mocked one).
+   This is a way to run tests inside a complete running instance of QGIS.
 
+   See https://github.com/qgis/QGIS/tree/master/.docker for a complete
+   documentation.
+
+   In the =qgis_docker= directory of this repo there are some example of tests to
+   be run with this solution.
+
+   To run the tests you need fist to build the docker image
    #+begin_src sh
      # Clone the QGIS repo
      git clone QGIS/QGIS
@@ -23,7 +44,26 @@
       --build-arg DOCKER_TAG=latest \
       -f .docker/qgis.dockerfile \
       .
+   #+end_src
 
+   Then run the docker container in which to perform the tests mounting the
+   local directory with the tests inside the docker
+   #+begin_src sh
+     # Run the docker container in which to perform the tests
+     docker run -d --name qgis -v /tmp/.X11-unix:/tmp/.X11-unix \
+      -v /home/mario/workspace/repos/qgis_plugins_test_demo/qgis_docker/:/tests_directory \
+      -e DISPLAY=:99 \
+      qgis/qgis:latest
+   #+end_src
+
+   And finally you can launch the tests inside the docker container
+   #+begin_src sh
+     # Run the tests in the docker QGIS
+     docker exec -it qgis sh -c "cd /tests_directory && qgis_testrunner.sh tests.test_geometries.run_all"
+   #+end_src
+
+   It is also possible to run a QGIS instance with GUI from this docker
+   #+begin_src sh
      # To run a QGIS instance with GUI
      xhost +
 
@@ -31,17 +71,8 @@
       -v /tmp/.X11-unix:/tmp/.X11-unix \
       -e DISPLAY=unix$DISPLAY \
       qgis/qgis:latest qgis
-
-     # Run the docker container in which to perform the tests
-     docker run -d --name qgis -v /tmp/.X11-unix:/tmp/.X11-unix \
-      -v /home/mario/workspace/repos/qgis_plugins_test_demo/qgis_docker/:/tests_directory \
-      -e DISPLAY=:99 \
-      qgis/qgis:latest
-
-     # Run the tests in the docker QGIS
-     docker exec -it qgis sh -c "cd /tests_directory && qgis_testrunner.sh tests.test_geometries.run_all"
    #+end_src
-** References
+** Other references
    - https://github.com/qgis/QGIS/tree/master/tests/src/python Python unit tests
      of QGIS. It is very useful as documentation on how to use classes and
      functions and how to test them.
