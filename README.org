@@ -31,10 +31,10 @@
    See https://github.com/qgis/QGIS/tree/master/.docker for a complete
    documentation.
 
-   In the =qgis_docker= directory of this repo there are some example of tests to
+   In the =qgis_docker= directory of this repo there are some examples of tests to
    be run with this solution.
 
-   To run the tests you need fist to build the docker image
+   To run the tests you need to first build the docker image
    #+begin_src sh
      # Clone the QGIS repo
      git clone QGIS/QGIS
@@ -72,7 +72,7 @@
       -e DISPLAY=unix$DISPLAY \
       qgis/qgis:latest qgis
    #+end_src
-** Other references
+** References
    - https://github.com/qgis/QGIS/tree/master/tests/src/python Python unit tests
      of QGIS. It is very useful as documentation on how to use classes and
      functions and how to test them.
