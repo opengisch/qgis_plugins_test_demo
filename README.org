@@ -20,14 +20,23 @@
 
      # Build the docker image
      docker build -t qgis/qgis:latest \
-     --build-arg DOCKER_TAG=latest \
-     -f .docker/qgis.dockerfile \
-     .
+      --build-arg DOCKER_TAG=latest \
+      -f .docker/qgis.dockerfile \
+      .
 
-     # To run locally a QGIS instance with GUI
+     # To run a QGIS instance with GUI
+     xhost +
+
+     docker run --rm -it --name qgis \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
+      -e DISPLAY=unix$DISPLAY \
+      qgis/qgis:latest qgis
+
+     # Run the docker container in which to perform the tests
      docker run -d --name qgis -v /tmp/.X11-unix:/tmp/.X11-unix \
-     -e DISPLAY=:99 \
-     qgis/qgis:latest
+      -v /home/mario/workspace/repos/qgis_plugins_test_demo/qgis_docker/:/tests_directory \
+      -e DISPLAY=:99 \
+      qgis/qgis:latest
 
      # Run the tests in the docker QGIS
      docker exec -it qgis sh -c "cd /tests_directory && qgis_testrunner.sh tests.test_geometries.run_all"
