@@ -1,15 +1,52 @@
 * Plugins test
 ** With qgis.testing
-   For unit tests
+   This solution is especially suitable for unit tests. Virtually every QGIS
+   feature that has a python API can be used except for operations directly
+   related to the user interface.
+
+   For example, here
+   https://github.com/opengisch/QgisModelBaker/tree/master/QgisModelBaker/tests
+   is used where QGIS is located in a docker and tests are performed in this
+   way.
+
    Run the tests with =nosetests /unit=
 ** Full QGIS in a docker
-   For functional/integration tests
-** References
-   - https://github.com/qgis/QGIS/blob/master/python/testing/mocked.py
-   - https://github.com/opengisch/QgisModelBaker/tree/master/QgisModelBaker/tests
-   - https://github.com/opengisch/qfieldsync/tree/master/qfieldsync/tests
-   - https://github.com/boundlessgeo/qgis-testing-environment-docker
-   - https://github.com/opengisch/plugin_ci
-   - https://github.com/opengisch/opencomptage
-   - https://github.com/qgis/QGIS/tree/master/tests/src/python
+   See https://github.com/qgis/QGIS/tree/master/.docker. This is a way to run
+   tests inside a real instance of QGIS (not a mocked one).
 
+   #+begin_src sh
+     # Clone the QGIS repo
+     git clone QGIS/QGIS
+
+     # Build the docker image
+     docker build -t qgis/qgis:latest \
+     --build-arg DOCKER_TAG=latest \
+     -f .docker/qgis.dockerfile \
+     .
+
+     # To run locally a QGIS instance with GUI
+     docker run -d --name qgis -v /tmp/.X11-unix:/tmp/.X11-unix \
+     -e DISPLAY=:99 \
+     qgis/qgis:latest
+
+     # Run the tests in the docker QGIS
+     docker exec -it qgis sh -c "cd /tests_directory && qgis_testrunner.sh tests.test_geometries.run_all"
+   #+end_src
+** References
+   - https://github.com/qgis/QGIS/tree/master/tests/src/python Python unit tests
+     of QGIS. It is very useful as documentation on how to use classes and
+     functions and how to test them.
+   - https://github.com/qgis/QGIS/blob/master/python/testing/mocked.py Mocked
+     QgisInterface
+   - https://github.com/opengisch/QgisModelBaker/tree/master/QgisModelBaker/tests
+     Example of test implementations using qgis.testing in the QGIS Model Baker
+     project
+   - https://github.com/opengisch/qfieldsync/tree/master/qfieldsync/tests
+     Example of test implementations using qgis.testing in the QFieldsync
+     project
+   - https://github.com/qgis/QGIS/tree/master/.docker Documentation to the QGIS
+     docker image and how to use it to run tests inside a real instance of QGIS.
+   - https://github.com/boundlessgeo/qgis-testing-environment-docker Docs to
+     create a docker container with a real QGIS instance (now part of QGIS)
+   - https://github.com/opengisch/plugin_ci Scripts to do automated testing and
+     deployment for QGIS plugins
